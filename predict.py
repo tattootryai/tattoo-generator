@@ -7,7 +7,7 @@ from PIL import Image
 class Predictor(BasePredictor):
     def setup(self):
         base_model = "stabilityai/stable-diffusion-xl-base-1.0"
-        lora_path = "./tattoo_pro.safetensors"  # Make sure this matches your file
+        lora_path = "https://huggingface.co/tattootryai/tattoo-pro-lora/resolve/main/tattoo_pro.safetensors"
 
         self.pipe = StableDiffusionXLPipeline.from_pretrained(
             base_model,
