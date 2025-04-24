@@ -9,6 +9,7 @@ class Predictor(BasePredictor):
         base_model = "stabilityai/stable-diffusion-xl-base-1.0"
         lora_path = "https://huggingface.co/tattootryai/tattoo-pro-lora/resolve/main/tattoo_pro.safetensors"
 
+        
         self.pipe = StableDiffusionXLPipeline.from_pretrained(
             base_model,
             torch_dtype=torch.float16,
