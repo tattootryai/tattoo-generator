@@ -1,48 +1,23 @@
-import os
 import torch
-from cog import BasePredictor, Input, Path
-from diffusers import StableDiffusionXLPipeline, DDIMScheduler
-from PIL import Image
+from diffusers import StableDiffusionPipeline
 
-class Predictor(BasePredictor):
-    def setup(self):
-        base_model = "stabilityai/stable-diffusion-xl-base-1.0"
-        lora_path = "https://huggingface.co/tattootryai/tattoo-pro-lora/resolve/main/tattoo_pro.safetensors"
+def load_model():
+    model_id = "SG161222/Realistic_Vision_V5.1_noVAE"
+    lora_path = "https://huggingface.co/tattootryai/TattooXL-LoRA/resolve/main/tattooxl_lora.safetensors"
 
-        
-        self.pipe = StableDiffusionXLPipeline.from_pretrained(
-            base_model,
-            torch_dtype=torch.float16,
-            use_safetensors=True,
-            variant="fp16"
-        ).to("cuda")
+    pipe = StableDiffusionPipeline.from_pretrained(
+        model_id,
+        torch_dtype=torch.float16,
+        variant="fp16"
+    )
+    pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+    pipe.load_lora_weights(lora_path)
 
-        self.pipe.scheduler = DDIMScheduler.from_config(self.pipe.scheduler.config)
-        self.pipe.load_lora_weights(lora_path)
+    return pipe
 
-    def predict(
-        self,
-        prompt: str = Input(description="Tattoo prompt"),
-        negative_prompt: str = Input(default="ugly, blurry, deformed, extra limbs", description="What to avoid"),
-        guidance_scale: float = Input(default=7.5),
-        num_inference_steps: int = Input(default=30),
-        width: int = Input(default=768),
-        height: int = Input(default=768),
-        seed: int = Input(default=None)
-    ) -> Path:
+model = load_model()
 
-        generator = torch.manual_seed(seed) if seed else None
-
-        image = self.pipe(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            num_inference_steps=num_inference_steps,
-            guidance_scale=guidance_scale,
-            width=width,
-            height=height,
-            generator=generator
-        ).images[0]
-
-        output_path = "/tmp/output.png"
-        image.save(output_path)
-        return Path(output_path)
+def predict(prompt: str = "a blackwork eagle head tattoo on forearm"):
+    image = model(prompt).images[0]
+    image.save("output.png")
+    return image
