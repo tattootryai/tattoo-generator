@@ -1,6 +1,4 @@
 torch
-transformers
 diffusers
-accelerate
+transformers
 safetensors
-Pillow
